@@ -76,7 +76,7 @@ module AssetSync
         elsif File.exist?(self.config.manifest_path)
           log "Using: Manifest #{self.config.manifest_path}"
           yml = YAML.load(IO.read(self.config.manifest_path))
-   
+
           return yml.map do |original, compiled|
             # Upload font originals and compiled
             if original =~ /^.+(eot|svg|ttf|woff)$/
@@ -167,7 +167,7 @@ module AssetSync
         # as we will overwrite file.css with file.css.gz if it exists.
         log "Ignoring: #{f}"
         ignore = true
-      elsif config.gzip? && File.exist?(gzipped)
+      elsif config.gzip? && File.exist?(gzipped) && replace_with_gzip?(f)
         original_size = File.size("#{path}/#{f}")
         gzipped_size = File.size(gzipped)
 
@@ -205,6 +205,10 @@ module AssetSync
       end
 
       file = bucket.files.create( file ) unless ignore
+    end
+
+    def replace_with_gzip?(fname)
+      File.extname(fname) != ".svg"
     end
 
     def upload_files
